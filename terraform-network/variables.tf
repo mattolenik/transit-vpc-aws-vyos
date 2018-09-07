@@ -1,9 +1,11 @@
 variable "aws_region" {
   default = "us-west-2"
 }
+
 variable "aws_profile" {
   default = "subaccount"
 }
+
 variable "environment" {
   default = "dev"
 }
@@ -11,14 +13,16 @@ variable "environment" {
 #Ubuntu 16.04 hvm ebs
 variable "ami_ubuntu" {
   type = "map"
+
   default = {
-    "us-west-2" = "ami-51537029"
-    "eu-west-1" = "ami-c1167eb8"
+    "us-west-2"      = "ami-51537029"
+    "eu-west-1"      = "ami-c1167eb8"
     "ap-southeast-1" = "ami-a55c1dd9"
   }
 }
 
 variable "ami_vyos" {
+  default = "ami-92e86ae8"
 }
 
 variable "vyos_instance_type" {
