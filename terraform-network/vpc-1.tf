@@ -1,5 +1,5 @@
 module "vpc_1" {
- source = "modules/vpc"
+ source = "terraform-aws-modules/vpc/aws"
 
   name = "mth-transit-vpc-1"
   cidr = "10.232.0.0/20"

@@ -9,7 +9,7 @@ resource "aws_eip_association" "eip_assoc" {
 resource "aws_instance" "vyos_instance" {
   ami           = "${var.ami_vyos}"
   instance_type = "${var.vyos_instance_type}"
-  subnet_id = "${module.vpc_transit.public_subnets[0]}"
+  subnet_id = "${var.transit_subnet_id}"
   vpc_security_group_ids = ["${aws_security_group.vyos_instance.id}"]
   key_name = "${aws_key_pair.mth_kp.id}"
 
@@ -25,7 +25,7 @@ resource "aws_instance" "vyos_instance" {
 resource "aws_security_group" "vyos_instance" {
   name        = "vyos-instance-ssh-sg"
   description = "Allow ssh traffic from certain IP range to vyos_instance on port 22"
-  vpc_id      = "${module.vpc_transit.vpc_id}"
+  vpc_id      = "${var.transit_vpc_id}"
 
   ingress {
     from_port   = 0
