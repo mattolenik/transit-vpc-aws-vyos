@@ -1,4 +1,6 @@
-resource "aws_eip" "vyos_instance" {}
+resource "aws_eip" "vyos_instance" {
+  vpc = true
+}
 
 resource "aws_eip_association" "eip_assoc" {
   instance_id   = "${aws_instance.vyos_instance.id}"
@@ -16,8 +18,6 @@ resource "aws_instance" "vyos_instance" {
     Name        = "vyos_instance"
     Terraform   = "true"
     Environment = "${var.environment}"
-    Purpose     = "try transitvpc"
-    Owner       = "Mark thebault"
   }
 }
 
@@ -27,16 +27,16 @@ resource "aws_security_group" "vyos_instance" {
   vpc_id      = "${var.transit_vpc_id}"
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }

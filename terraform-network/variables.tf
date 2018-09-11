@@ -22,11 +22,11 @@ variable "ami_ubuntu" {
 }
 
 variable "ami_vyos" {
-  default = "ami-92e86ae8"
+  default = "ami-9cd407e4"
 }
 
 variable "vyos_instance_type" {
-  default = "c5.large"
+  default = "m4.large"
 }
 
 variable "key_pair_public_path" {
