@@ -2,12 +2,12 @@ module "vpc_1" {
   source = "git@github.com:mattolenik/terraform-aws-vpc.git"
 
   name = "mth-transit-vpc-1"
-  cidr = "172.32.0.0/16"
+  cidr = "172.31.3.0/24"
 
   azs = ["${var.aws_region}a", "${var.aws_region}b"]
 
-  public_subnets  = ["172.32.1.0/24"]
-  private_subnets = ["172.32.2.0/24", "172.32.3.0/24"]
+  #public_subnets  = ["172.32.1.0/24"]
+  private_subnets = ["172.31.3.0/24"]
 
   enable_nat_gateway   = false
   enable_vpn_gateway   = true
