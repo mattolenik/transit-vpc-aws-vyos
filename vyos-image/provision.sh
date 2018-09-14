@@ -3,30 +3,27 @@
 set -ex
 set -o pipefail
 
-# Ensure this script is run as root
-if [ "$(id -u)" -ne "0" ]; then
-  exec sudo -E $0 "$@"
-fi
+VYOS_PKG_URL="https://artifacts.dev.versive.com/artifactory/vyos-iso"
 
 # Global variable definition
 vyos_iso_local=/tmp/vyos.iso
-vyos_iso_url=http://packages.vyos.net/iso/release/${VYOS_VERSION}/vyos-${VYOS_VERSION}-amd64.iso
+vyos_iso_url="$VYOS_PKG_URL/${VYOS_VERSION}/vyos-${VYOS_VERSION}-amd64.iso"
 
 CD_ROOT=/mnt/cdrom
 CD_SQUASH_ROOT=/mnt/cdsquash
 SQUASHFS_IMAGE="${CD_ROOT}/live/filesystem.squashfs"
 
 VOLUME_DRIVE=/dev/xvdf
-ROOT_PARTITION=${VOLUME_DRIVE}1
+ROOT_PARTITION="${VOLUME_DRIVE}1"
 
 WRITE_ROOT=/mnt/wroot
 READ_ROOT=/mnt/squashfs
 INSTALL_ROOT=/mnt/inst_root
 
 # Fetch GPG key and VyOS image
-curl -sSLfo ${vyos_iso_local} ${vyos_iso_url}
-curl -sSLfo ${vyos_iso_local}.asc ${vyos_iso_url}.asc
-curl -sSLf http://packages.vyos.net/vyos-release.gpg | gpg --import
+curl -sSLfo "${vyos_iso_local}" "${vyos_iso_url}"
+curl -sSLfo "${vyos_iso_local}.asc" "${vyos_iso_url}.asc"
+curl -sSLf "$VYOS_PKG_URL/vyos-release.gpg" | gpg --import
 
 # Verify ISO is valid
 gpg --verify ${vyos_iso_local}.asc ${vyos_iso_local}
@@ -55,23 +52,23 @@ mkdir -p ${WRITE_ROOT}
 mount -t ext4 ${ROOT_PARTITION} ${WRITE_ROOT}
 
 # Create installation directory
-mkdir -p ${WRITE_ROOT}/boot/${vyos_version}/live-rw
+mkdir -p "${WRITE_ROOT}/boot/${vyos_version}/live-rw"
 
 # Copy files from ISO to filesystem
-cp -p ${SQUASHFS_IMAGE} ${WRITE_ROOT}/boot/${vyos_version}/${vyos_version}.squashfs
-find ${CD_SQUASH_ROOT}/boot -maxdepth 1  \( -type f -o -type l \) -exec cp -dp {} ${WRITE_ROOT}/boot/${vyos_version}/ \;
+cp -p ${SQUASHFS_IMAGE} "${WRITE_ROOT}/boot/${vyos_version}/${vyos_version}.squashfs"
+find ${CD_SQUASH_ROOT}/boot -maxdepth 1  \( -type f -o -type l \) -exec cp -dp {} "${WRITE_ROOT}/boot/${vyos_version}/" \;
 
 # Mount squashfs from filesystem
 mkdir -p ${READ_ROOT}
-mount -t squashfs -o loop,ro ${WRITE_ROOT}/boot/${vyos_version}/${vyos_version}.squashfs ${READ_ROOT}
+mount -t squashfs -o loop,ro "${WRITE_ROOT}/boot/${vyos_version}/${vyos_version}.squashfs" ${READ_ROOT}
 
 # Set up union root for post installation tasks
-mkdir -p ${INSTALL_ROOT}
-mkdir -p ${WRITE_ROOT}/boot/${vyos_version}/work
-mount -t overlay -o "noatime,upperdir=${WRITE_ROOT}/boot/${vyos_version}/live-rw,lowerdir=${READ_ROOT},workdir=${WRITE_ROOT}/boot/${vyos_version}/work" none ${INSTALL_ROOT}
+mkdir -p "${INSTALL_ROOT}"
+mkdir -p "${WRITE_ROOT}/boot/${vyos_version}/work"
+mount -t overlay -o "noatime,upperdir=${WRITE_ROOT}/boot/${vyos_version}/live-rw,lowerdir=${READ_ROOT},workdir=${WRITE_ROOT}/boot/${vyos_version}/work" none "${INSTALL_ROOT}"
 
 # Make sure that config partition marker exists
-touch ${INSTALL_ROOT}/opt/vyatta/etc/config/.vyatta_config
+touch "${INSTALL_ROOT}/opt/vyatta/etc/config/.vyatta_config"
 
 # Copy default config file to config directory
 chroot --userspec=root:vyattacfg ${INSTALL_ROOT} cp /opt/vyatta/etc/config.boot.default /opt/vyatta/etc/config/config.boot
@@ -125,7 +122,7 @@ for path in boot dev sys proc; do
   umount ${INSTALL_ROOT}/${path}
 done
 umount ${INSTALL_ROOT}
-rm -rf ${WRITE_ROOT}/boot/${vyos_version}/work
+rm -rf "${WRITE_ROOT}/boot/${vyos_version}/work"
 umount ${READ_ROOT}
 umount ${WRITE_ROOT}
 umount ${CD_SQUASH_ROOT}
